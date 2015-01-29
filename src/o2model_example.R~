@@ -1,5 +1,7 @@
 ###Example: how to use the functions from o2model.R.
 
+source('./o2model.R')
+
 test <- simPitcher()
 
 t <- seq(0,2880,by=1)
@@ -27,6 +29,8 @@ for (i in 1:100){
 plot(test~seq(1,100,by=1))
 
 w <- f.w(t)
+plot(w)
+abline(v=c(1440,(1440*2)))
 
 
 ###Optimize using Baiser 2011

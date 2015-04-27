@@ -12,7 +12,7 @@ f.w <- function(t=seq(0,1440,by=1),beta=0.005737,w0=75){
   w0 * exp(-beta * t)
 }
 
-simPitcher <- function(days=3,x0=0,a0=10,a.max=2,a.min=0,s=10,d=0.5,m=1,w0=100,prey.t=720,Kw=0.001,prey.time=720){
+simPitcher <- function(days=3,x0=0,a0=10,a.max=2,a.min=0,s=10,d=0.5,m=1,w0=100,prey.t=720,Kw=0.001){
     t=seq(0,1440,by=1)
     wf <- 0
     A <- 0
@@ -22,7 +22,7 @@ simPitcher <- function(days=3,x0=0,a0=10,a.max=2,a.min=0,s=10,d=0.5,m=1,w0=100,p
     out <- list()
     for (d in 1:days){
         w <- f.w(t=t,w0=wf+w0)
-        if (prey.time != 0){w <- c(rep(wf,prey.time),w);w <- w[1:length(t)]}
+        if (prey.t != 0){w <- c(rep(wf,prey.t),w);w <- w[1:length(t)]}
         for (i in 1:(length(t))){
             n[i] <- (w[i]*x[i]) / 100 # arbitrary constant
             Amax <- (a.max-a.min) / (1+exp(s*n[i]-d)) + a.min

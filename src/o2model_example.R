@@ -1,9 +1,19 @@
 ###Example: how to use the functions from o2model.R.
 source('o2model.R')
 
-### photosynthesis
-photo <- f.A()
+days <- 10
+### Photosynthetically active radiation (PAR)
+photo <- rep(PAR(),5)
 plot(photo,type='l')
+
+### O2 production with no augmentation
+a <- 10
+O2 <- a * photo
+plot(o2,type='l')
+
+### O2 production augmented by decomposition
+
+
 
 ### decomp
 decomp <- f.w()

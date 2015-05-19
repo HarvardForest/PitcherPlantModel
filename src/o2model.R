@@ -38,12 +38,15 @@ decomp <- function(days=3,prey.0=0,prey.add=5,t.add=720,beta=0.0005){
     return(unlist(out))
 }
 
-simO2 <- function(days=10,prey.add=5,beta=0.0005){
+simO2 <- function(days=10,prey.add=5,beta=0.0005,t.add=720,bod.rescale=TRUE,bod.scalar=10){
     photo <- light(days) * PAR(days=days)
-    prey <- decomp(days,prey.add=prey.add,beta=beta)
+    prey <- decomp(days,prey.add=prey.add,beta=beta,t.add=t.add)
     bod <- BOD(prey)
+    if (bod.rescale == TRUE){
+        bod <- bod * bod.scalar
+    }
     o2 <- photo - bod
     o2[o2 < 0] <- 0
-    out <- cbind(t=rep(1:1440,days),O2=o2,photo=photo,prey=prey,bod=bod)
+    out <- data.frame(t=rep(1:1440,days),O2=o2,photo=photo,prey=prey,bod=bod)
     return(out)
 }

@@ -2,21 +2,27 @@
 function(input, output, session) {
                                         # Define a reactive expression for the document term matrix
     terms <- reactive({
-        simPitcher(days=input$days,
-                   w0=input$prey,
-                   a.max=input$amax,
-                   prey.t=input$preytime,
-                   Kw=input$Kw,x0=0,a0=0,m=1,s=10,a.min=0,d=0.5)
+        simO2(
+            days=input$days,
+            prey.add=input$prey,
+            t.add=input$preytime,
+            beta=input$beta,
+            bod.rescale=input$bodrescale,
+            bod.scalar=input$bodscalar
+            )
     })
-    k <- reactive({as.numeric(input$lagtime)})
+    ##time lagging
+    k <- reactive({as.numeric(input$lag)})
 
                                         # Make drawing predictable during a session
     output$plot <- renderPlot({
-        if (input$plot.choice == 'Time-Lag'){
-            plot(terms()$x[(k()+1):length(terms()$x)]~terms()$x[1:(length(terms()$x)-k())],
-                 xlab='x(t)',ylab='x(t + k)',type='l')
-        }else{
-            pairs(terms())
-        }
-    })
+        par(mfrow=c(2,2))
+        plot.ts(terms()[,4],ylab='Prey')
+        plot.ts(terms()[,5],ylab='BOD')
+        plot.ts(terms()[,2],ylab=expression('O'[2]),main='')
+        plot(terms()[,2],
+        c(terms()[k():length(terms()[,2]),2],terms()[1:(k()-1),2]),
+             xlab='t',
+             ylab='t+k',type='l',main=expression('O'[2]))
+    },width=700,height=750)
 }

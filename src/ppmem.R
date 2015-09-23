@@ -8,9 +8,9 @@ PAR <- function(days=3,start=0,amp=100){
     amp * sin(2 * pi * rep((1:1440 + 1080 + start),days) * (1/1440))
 }
 
-photo <- function(days=3,Amax=4,Aqe=0.3,LCP=0,start=0,amp=50){
+photo <- function(days=3,Amax=4,Amin=0,Aqe=0.3,LCP=0,start=0,amp=50){
     out <- Amax * (1 - exp(-Aqe * (PAR(days,start,amp) - LCP)))
-    out[out < LCP] <- 0
+    out[out < Amin] <- Amin
     return(out)
 }
 
@@ -124,3 +124,21 @@ colnames(data) <- c("Minute", "Oxygen", "Photosynthesis",
 return(data)
 }
 
+### hysteresis statistics
+### rr.O2 = return rate for oxygen from final feeding to final day + feeding time
+### hyst.max = maximum value greater than the value at final feeding time
+### hyst.rate = rate of change from final feeding to hyst.max
+
+ppHyst <- function(x,n1,n2,n3,feedingTime=720){
+    if (class(x) != 'numeric' & 
+        (class(x) == 'data.frame' | class(x) == 'matrix')){
+        x <- x$Oxygen
+    }
+    rr.i <- ((n1+n2)*1440) + feedingTime
+    rr.f <- ((n1+n2+n3)*1440) - feedingTime
+    hyst.max <- max(x[(rr.i + 1) : (rr.f)])
+    hyst.rate <- (x[rr.i] - hyst.max) / ((rr.i - (1:length(x))[x == hyst.max]) / 1440)
+    rr.O2 <- (x[rr.i] - x[rr.f]) / ((rr.i - rr.f)/1440)
+    out <- c(rr.O2=rr.O2,hyst.max=hyst.max,hyst.rate=hyst.rate)
+    return(out)
+}

@@ -4,8 +4,12 @@ source('ppme.R')
 ### Sensitivity
 
 ## set length of time and parameter space
-days <- 15
-foodWeight <- sapply(seq(0,10,by=1),function(x) c(0,rep(x,7),rep(0,7)))
+n1 <- 5;n2 <- 3;n3 <- 30
+days <- n1 + n2 + n3
+
+foodWeight <- sapply(seq(0,10,by=1),
+                     function(x,n1,n2,n3) c(rep(0,n1),rep(x,n2),rep(0,n3)),
+                     n1=n1,n2=n2,n3=n3)
 d <- seq(-5,5,by=1)
 beta <- seq(0.001,0.003,length=11)
 

@@ -124,21 +124,45 @@ colnames(data) <- c("Minute", "Oxygen", "Photosynthesis",
 return(data)
 }
 
+maxify <- function(x,p=1440){
+    out <- list()
+    n <- length(x)/p
+    for (i in 1:n){out[[i]] <- max(x[(1+(p*(i-1))):((p*i)-1)])}
+    return(unlist(out))
+}
+
+minify <- function(x,p=1440){
+    out <- list()
+    n <- length(x)/p
+    for (i in 1:n){out[[i]] <- min(x[(1+(p*(i-1))):((p*i)-1)])}
+    return(unlist(out))
+}
+
 ### hysteresis statistics
-### rr.O2 = return rate for oxygen from final feeding to final day + feeding time
-### hyst.max = maximum value greater than the value at final feeding time
-### hyst.rate = rate of change from final feeding to hyst.max
 
 ppHyst <- function(x,n1,n2,n3,feedingTime=720){
     if (class(x) != 'numeric' & 
         (class(x) == 'data.frame' | class(x) == 'matrix')){
         x <- x$Oxygen
     }
-    rr.i <- ((n1+n2)*1440) + feedingTime
-    rr.f <- ((n1+n2+n3)*1440) - feedingTime
-    hyst.max <- max(x[(rr.i + 1) : (rr.f)])
-    hyst.rate <- (x[rr.i] - hyst.max) / ((rr.i - (1:length(x))[x == hyst.max]) / 1440)
-    rr.O2 <- (x[rr.i] - x[rr.f]) / ((rr.i - rr.f)/1440)
-    out <- c(rr.O2=rr.O2,hyst.max=hyst.max,hyst.rate=hyst.rate)
+
+    hyst.start <- ((n1+n2)*1440) 
+    base <- max(x[1:(1440*n1)])
+    hyst <- x[hyst.start:length(x)]
+    max.hyst <- maxify(hyst)
+
+## max - base
+    dMB <- max(x[hyst.start:length(x)]) - base
+
+## return rate = time from last feeding to return to base
+    r.t <- ((1:length(max.hyst))[max.hyst == base][1])
+    rr <- (dMB) / r.t
+
+## integrate area above baseline post feeding days and divide by time
+    int.hyst <- sum(hyst[hyst > base]) / ((length(x) - hyst.start) / 1440)
+
+## output
+    out <- c(dMB=dMB,return.rate=rr,int.hyst=int.hyst)
     return(out)
+
 }

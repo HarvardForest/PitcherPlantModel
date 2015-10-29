@@ -140,7 +140,7 @@ minify <- function(x,p=1440){
 
 ### hysteresis statistics
 
-ppHyst <- function(x,n1,n2,n3,feedingTime=720){
+ppHyst <- function(x,n1,n2,feedingTime=720,tol=0){
     if (class(x) != 'numeric' & 
         (class(x) == 'data.frame' | class(x) == 'matrix')){
         x <- x$Oxygen
@@ -152,17 +152,17 @@ ppHyst <- function(x,n1,n2,n3,feedingTime=720){
     max.hyst <- maxify(hyst)
 
 ## max - base
-    dMB <- max(x[hyst.start:length(x)]) - base
+    dMB <- max(max.hyst) - base
+
+## min - base
+    dmB <- min(max.hyst) - base
 
 ## return rate = time from last feeding to return to base
-    r.t <- ((1:length(max.hyst))[max.hyst == base][1])
-    rr <- (dMB) / r.t
-
-## integrate area above baseline post feeding days and divide by time
-    int.hyst <- sum(hyst[hyst > base]) / ((length(x) - hyst.start) / 1440)
+    r.t <- ((1:length(max.hyst))[max.hyst <= (base + tol) & max.hyst >= (base - tol)][1])
+    Mrr <- (dMB) / r.t
+    mrr <- (dmB) / r.t
 
 ## output
-    out <- c(dMB=dMB,return.rate=rr,int.hyst=int.hyst)
+    out <- c(return.time=r.t,dMB=dMB,max.return.rate=Mrr,dmB=dmB,min.return.rate=mrr)
     return(out)
-
 }

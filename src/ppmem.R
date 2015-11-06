@@ -14,8 +14,7 @@ photo <- function(days=3,Amax=4,Amin=0,Aqe=0.3,LCP=0,start=0,amp=50){
     return(out)
 }
 
-pitcherPlantSim <- function(days=3, feedingTime=720, foodWeight=5, beta=0.001, k=1, Bscaler=10,
-                            aMax=10, aMin=1, s=10, d=1, c=100) {
+pitcherPlantSim <- function(days=3, feedingTime=720, foodWeight=5, beta=0.001, k=1, Bscaler=10,m=0,aMax=10, aMin=1, s=10, d=1, c=100) {
 
 minute <- vector(mode="numeric") # t/time variable
 x <- vector(mode="numeric") # amount of o2
@@ -93,7 +92,8 @@ for(z in 1:days){
     a <- c(a, ((aMax-aMin)/(1+exp((-s*n[length(minute)])-d)))+aMin)
 
     # adjust o2 amount
-    tempO2 <- (a[length(minute)]*P[length(minute)])-B[length(minute)]
+    tempO2 <- (a[length(minute)]*P[length(minute)])- (m + B[length(minute)])
+    
     if(is.na(tempO2) == FALSE && tempO2 > 0){
       x <- c(x, tempO2)
     }

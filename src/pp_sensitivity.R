@@ -1,5 +1,5 @@
 source('ppme.R')
-## out.dir <- '../results/ppSim'
+out.dir <- '../results/ppSim'
 
 ### Sensitivity
 

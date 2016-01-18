@@ -146,7 +146,7 @@ ppHyst <- function(x,n1,n2,feedingTime=720,tol=0){
         x <- x$Oxygen
     }
 
-    hyst.start <- ((n1+n2)*1440) 
+    hyst.start <- ((n1+n2)*1440)
     base <- max(x[1:(1440*n1)])
     hyst <- x[hyst.start:length(x)]
     max.hyst <- maxify(hyst)
@@ -158,7 +158,13 @@ ppHyst <- function(x,n1,n2,feedingTime=720,tol=0){
     dmB <- min(max.hyst) - base
 
 ## return rate = time from last feeding to return to base
-    r.t <- ((1:length(max.hyst))[max.hyst <= (base + tol) & max.hyst >= (base - tol)][1])
+    if (all(max.hyst <= (base + tol) &  max.hyst >= (base - tol))){
+        r.t <- ((1:length(max.hyst))[max.hyst <= (base + tol) & 
+                                         max.hyst >= (base - tol)][1])
+    }else{
+        r.t <- length(max.hyst)
+    }
+    
     Mrr <- (dMB) / r.t
     mrr <- (dmB) / r.t
 

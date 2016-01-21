@@ -45,17 +45,24 @@ B <- 0/(k+0)
 # o2 at minute=0, P=0 b/c unable to index at minute=0
 x <- (a*0)-B
 
+# augmented photosynthesis initialization
+A <- photo[1]
+
+
 # simulate until food is first added
 # loop runs until feedingTime-2 b/c food is added AT the minute
 for(i in 1:(feedingTime-2)){
   # augmentation function - default value
   a <- c(a, ((aMax-aMin)/(1+exp((-s*n[i])-d)))+aMin)
 
+  # augmented photosynthesis
+  A <- c(A, (a[i] * P[i])) 
+
   # biological oxygen demand - default value (no food = no microbes)
   B <- c(B, 0/(k+0))
 
   # calculate o2 amount - product of photosynthesis alone (no food)
-  x <- c(x, (a[i]*P[i])-B[i])
+  x <- c(x, (A[i])-B[i])
 
   # amount of food - no food
   w <- c(w, 0)
@@ -91,8 +98,10 @@ for(z in 1:days){
     # adjust augmentation value
     a <- c(a, ((aMax-aMin)/(1+exp((-s*n[length(minute)])-d)))+aMin)
 
+    A <- c(A,(a[length(minute)] * A[length(minute)])
+
     # adjust o2 amount
-    tempO2 <- (a[length(minute)]*P[length(minute)])- (m + B[length(minute)])
+    tempO2 <- (A[length(minute)])- (m + B[length(minute)])
     
     if(is.na(tempO2) == FALSE && tempO2 > 0){
       x <- c(x, tempO2)

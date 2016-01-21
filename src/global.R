@@ -46,8 +46,7 @@ B <- 0/(k+0)
 x <- (a*0)-B
 
 # augmented photosynthesis initialization
-A <- photo[1]
-
+A <- P[1]
 
 # simulate until food is first added
 # loop runs until feedingTime-2 b/c food is added AT the minute
@@ -98,7 +97,7 @@ for(z in 1:days){
     # adjust augmentation value
     a <- c(a, ((aMax-aMin)/(1+exp((-s*n[length(minute)])-d)))+aMin)
 
-    A <- c(A,(a[length(minute)] * A[length(minute)])
+    A <- c(A,(a[length(minute)] * A[length(minute)]))
 
     # adjust o2 amount
     tempO2 <- (A[length(minute)])- (m + B[length(minute)])
@@ -126,8 +125,8 @@ a <- a[1:length(P)]
 x <- x[1:length(P)]
 w <- w[1:length(P)]
 
-data <- data.frame(minute, x, P[1:length(x)], B, n, a, w)
-colnames(data) <- c("Minute", "Oxygen", "Photosynthesis",
+data <- data.frame(minute, P[1:length(x)], x, A, B, n, a, w)
+colnames(data) <- c("Minute", "PAR","Oxygen", "Photosynthesis",
                     "Biological Oxygen Demand", "Nutrients",
                     "Augmentation Value", "Food Amount")
 return(data)

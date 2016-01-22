@@ -27,7 +27,7 @@ P <- photo(days)
 # initial nutrient value
 n <- 0
 # initial augmentation value
-a <- ai 
+a <- ai * ((aMax-aMin)/(1+exp((-s*n[length(minute)])-d)))+aMin
 # initial biological o2 demand
 B <- 0/(k+0)
 # augmented photosynthesis initialization

@@ -15,7 +15,7 @@ photo <- function(days=3,Amax=4,Amin=0,Aqe=0.3,LCP=0,start=0,amp=50){
 }
 
 
-pitcherPlantSim <- function(days=3, feedingTime=720, foodWeight=0, beta=0.001, k=1, Bscaler=10,m=0,aMax=10, aMin=1, s=10, d=1, c=100,x0=0,w0=0,a0=1){
+pitcherPlantSim <- function(days=3, feedingTime=720, foodWeight=0, beta=0.001, k=1, Bscaler=10,m=0,aMax=10, aMin=1, s=10, d=1, c=100,x0=0,w0=0,a0=0){
 
     if (length(foodWeight) < days){
         foodWeight <- rep(foodWeight,days)[1:days]
@@ -50,7 +50,7 @@ pitcherPlantSim <- function(days=3, feedingTime=720, foodWeight=0, beta=0.001, k
                                         # time keeper
             minute <- c(minute,minute[length(minute)] + 1)
                                         # food weight at time 1
-            wt <- w[length(minute) - 1] * exp(w[length(minute) - 1] * beta)
+            wt <- w[length(minute) - 1] * exp(w[length(minute) - 1] * -beta)
             if (minute[length(minute)] == feedingTime){
                 w <- c(w,wt + foodWeight[z])
             }else{
@@ -68,6 +68,7 @@ pitcherPlantSim <- function(days=3, feedingTime=720, foodWeight=0, beta=0.001, k
             x <- c(x, A[length(minute)] - m + B[length(minute)])
         } # end minute loop
     } # end day loop
+
                                         # trim objects to appropriate time
                                         # omitted values aren't relevant
     minute <- minute[1:length(P)]

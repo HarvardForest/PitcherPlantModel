@@ -15,7 +15,9 @@ photo <- function(days=3,Amax=1,Amin=0,Aqe=0.3,LCP=0,start=0,amp=50){
 }
 
 
-pitcherPlantSim <- function(days=3, feedingTime=720, foodWeight=0, beta=0.001, k=1, Bscaler=10,m=0,aMax=2, aMin=0, s=10, d=5, c=100,x0=0,w0=0){
+pitcherPlantSim <- function(days=3, feedingTime=720, foodWeight=0, beta=0.001, k=1, Bscaler=10,m=0,aMax=2, aMin=0, s=10, d=5, c=100,x0=0,w0=0,sig.dig=3,tmp.file='.tmp'){
+
+    options(digits=sig.dig)
 
     if (length(foodWeight) < days){
         foodWeight <- rep(foodWeight,days)[1:days]
@@ -59,10 +61,9 @@ pitcherPlantSim <- function(days=3, feedingTime=720, foodWeight=0, beta=0.001, k
                                         # nutrient value
             n <- c(n,w[length(minute)] * x[length(minute) - 1] / c)
                                         # augmentation value
-###            a <- c(a,a[length(minute) - 1] * (((aMax - aMin)/(1 + exp((-s * n[length(minute)]) - d))) + aMin))
             a <- c(a,(((aMax - aMin)/(1 + exp((-(s * n[length(minute)]) - d)))) + aMin))
                                         # biological o2 demand
-            B <- c(B,a * (w[length(minute)] / (k + w[length(minute)]) * Bscaler))
+            B <- c(B,a[length(minute)] * (w[length(minute)] / (k + w[length(minute)]) * Bscaler))
                                         # augmented photosynthesis initialization
             A <- c(A,a[length(minute)] * P[length(minute)])
                                         # o2 at minute=0, P=0 b/c unable to index at minute=0

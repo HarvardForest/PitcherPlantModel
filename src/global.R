@@ -8,7 +8,7 @@ PAR <- function(days=3,start=0,amp=100){
     amp * sin(2 * pi * rep((1:1440 + 1080 + start),days) * (1/1440))
 }
 
-photo <- function(days=3,Amax=4,Amin=0,Aqe=0.3,LCP=0,start=0,amp=50){
+photo <- function(days=3,Amax=1,Amin=0,Aqe=0.3,LCP=0,start=0,amp=50){
     out <- Amax * (1 - exp(-Aqe * (PAR(days,start,amp) - LCP)))
     out[out < Amin] <- Amin
     return(out)

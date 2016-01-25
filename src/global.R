@@ -15,14 +15,10 @@ photo <- function(days=3,Amax=1,Amin=0,Aqe=0.3,LCP=0,start=0,amp=50){
 }
 
 
-pitcherPlantSim <- function(days=3, feedingTime=720, foodWeight=0, beta=0.001, k=1, Bscaler=10,m=0,aMax=2, aMin=0, s=10, d=5, c=100,x0=0,w0=0,sig.dig=3,tmp.file='.tmp'){
-
-    options(digits=sig.dig)
-
+pitcherPlantSim <- function(days=3, foodWeight=c(0,1,0), beta=0.1, d=0,  k=1, Bscaler=1,m=0,aMax=10, aMin=1, s=10, feedingTime=720, c=100,x0=0,w0=0,bound.max=FALSE,verbose=FALSE){
     if (length(foodWeight) < days){
         foodWeight <- rep(foodWeight,days)[1:days]
     }
-
     ## Initialization ##
                                         # time keeper
     minute <- 1
@@ -42,13 +38,12 @@ pitcherPlantSim <- function(days=3, feedingTime=720, foodWeight=0, beta=0.001, k
     B <- w[1]/(k+w[1])
                                         # augmented photosynthesis initialization
     A <- a * P[1]
-
                                         #start day loop
     for (z in 1:days){
                                         #star minute loop
         for (j in 1:1440){
-            print(c(z,j,minute[length(minute)]))
-            ##update##
+            if (verbose){print(c(z,j,minute[length(minute)]))}
+                                        # update #
                                         # time keeper
             minute <- c(minute,minute[length(minute)] + 1)
                                         # food weight at time 1
@@ -67,7 +62,10 @@ pitcherPlantSim <- function(days=3, feedingTime=720, foodWeight=0, beta=0.001, k
                                         # augmented photosynthesis initialization
             A <- c(A,a[length(minute)] * P[length(minute)])
                                         # o2 at minute=0, P=0 b/c unable to index at minute=0
-            x <- c(x, A[length(minute)] - m + B[length(minute)])
+            x <- c(x, A[length(minute)] - (m + B[length(minute)]))
+            if (is.na(x[length(x)])){x[length(x)] <- 0}
+            if (x[length(x)] < 0){x[length(x)] <- 0}
+            if (bound.max & x[length(x)] > aMax){x[length(x)] <- aMax}
         } # end minute loop
     } # end day loop
 

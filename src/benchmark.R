@@ -1,24 +1,32 @@
 ### Benchmarking the model for running on the server
 
-library(microbenchmark)
 source('global.R')
+library('txtplot')
+
+microbenchmark <- function(i=1){
+    ti <- Sys.time()
+    pitcherPlantSim(i)
+    tf <- Sys.time()
+    return(as.numeric(tf-ti))
+}
 
 res <- list()
 for (i in 1:15){
     print(i)
-    res[[i]] <- microbenchmark(pitcherPlantSim(i),times=1)
+    res[[i]] <- microbenchmark(i)
     print(res[[i]])
 }
 
-times <- (do.call(rbind,lapply(res,data.frame))[,2] * 1e-9)
+# times <- (do.call(rbind,lapply(res,data.frame))[,2] * 1e-9)
+times <- unlist(res)
 times.min <- times / 60
-plot(times.min)
+txtplot(times.min)
 
 days <- I(1:length(times))
 times.spline <- lm(log(times) ~ days)
 days <- seq(0,20,by=0.1)
 times.spline <- exp(predict(times.spline,list(days=days)))
-plot(times.spline~days)
+txtplot(days,times.spline)
 
 n <- 1000
 
@@ -28,14 +36,17 @@ d <- runif(n,0,5)
 k <- runif(n,0.001,1)
 factor.sample <- data.frame(fw,beta,d,k)
 
-pairs(factor.sample)
+txtplot(factor.sample[,1],factor.sample[,2],pch='.')
 
 time.total <- (times.spline * n)
 time.total <- time.total / 60 # minutes
 time.total <- time.total / 60 # hours
 
-plot(time.total~days,xlab='Simulated Days',ylab='Runtime (hrs)')
+tmp <- paste('.tmp',paste(sample(0:9,7),collapse=''),sep='')
+pdf(tmp)
+plot(days,time.total,xlab='Simulated Days',ylab='Runtime (hrs)')
 abline(h=c(24,48),col='grey',lty=2)
-abline(v=15,col='red',lwd=0.5)
-=======
-
+abline(v=c(15,20),col='red',lwd=0.5)
+dev.off()
+system(paste('scp',tmp, 'matthewklau@fas.harvard.edu:public_html/benchmark.pdf'))
+system(paste('rm',tmp))

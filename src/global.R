@@ -33,7 +33,7 @@ pitcherPlantSim <- function(days=3, foodWeight=c(0,1,0), beta=0.1, d=0,  k=1, Bs
                                         # initial nutrient value
     n <- w[1] * x[1] / c
                                         # initial augmentation value
-    a <- (((aMax-aMin)/(1+exp(-((s*n[length(minute)])-d)))) + aMin)
+    a <- (((aMax-aMin)/(1+exp(-(( s * n[length(minute)]) - d)))) + aMin)
                                         # initial biological o2 demand
     B <- w[1]/(k+w[1])
                                         # augmented photosynthesis initialization

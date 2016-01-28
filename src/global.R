@@ -108,30 +108,26 @@ ppHyst <- function(x,n1,n2,feedingTime=720,tol=0){
         (class(x) == 'data.frame' | class(x) == 'matrix')){
         x <- x$Oxygen
     }
-
-    hyst.start <- ((n1+n2)*1440)
-    base <- max(x[1:(1440*n1)])
+    hyst.start <- (((n1+n2)*1440) + 1) - feedingTime
     hyst <- x[hyst.start:length(x)]
-    max.hyst <- maxify(hyst)
-
-    ## max - base
-    dMB <- max(max.hyst) - base
-
-    ## min - base
-    dmB <- min(max.hyst) - base
-
+    if (n1 != 1 & any(x[1:1440] == x[1441:2880])){warning('n1! Check base values.')}
+    base <- rep(x[1:1440],ceiling(I(length(hyst)/1440)))[-1:-feedingTime]
+    dhb <- hyst - base
+    min.dhb <- minify(dhb)
     ## return rate = time from last feeding to return to base
-    if (all(max.hyst <= (base + tol) &  max.hyst >= (base - tol))){
-        r.t <- ((1:length(max.hyst))[max.hyst <= (base + tol) & 
-                                         max.hyst >= (base - tol)][1])
-    }else{
-        r.t <- length(max.hyst)
-    }
-
-    Mrr <- (dMB) / r.t
-    mrr <- (dmB) / r.t
-
+    rr.t <- (1:length(min.dhb))[abs(min.dhb) <= tol][1]
+    if (is.na(rr.t)){rr.t <- length(min.dhb)}
+    ## change in dbase from start of feeding to dbase=0 
+    ## or last time when feeding would occur
+    ## proportionate return rate = proportion of change 
+    ## from initial feeding point
+    prr <- (min.dhb[1] - min.dhb[rr.t]) / min.dhb[1] / rr.t 
+    ## proportion cumulative O2 change from base
+    ## i.e., how much O2 was porduced under hysteresis
+    ## compared to the total that would have been
+    ## produced without feeding
+    pcdb <- sum(hyst) / sum(base) 
     ## output
-    out <- c(return.time=r.t,dMB=dMB,max.return.rate=Mrr,dmB=dmB,min.return.rate=mrr)
+    out <- c(return.time=rr.t,prr=prr,pcdb=pcdb)
     return(out)
 }

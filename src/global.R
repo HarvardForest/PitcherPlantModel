@@ -110,7 +110,7 @@ ppHyst <- function(x,n1,n2,feedingTime=720,tol=0){
     }
     hyst.start <- (((n1+n2)*1440) + 1) - feedingTime
     hyst <- x[hyst.start:length(x)]
-    if (n1 != 1 & any(x[1:1440] == x[1441:2880])){warning('n1! Check base values.')}
+    if (n1 != 1 & any(x[1:1440] != x[1441:2880])){warning('n1! Check base values.')}
     base <- rep(x[1:1440],ceiling(I(length(hyst)/1440)))[-1:-feedingTime]
     dhb <- hyst - base
     min.dhb <- minify(dhb)
@@ -126,7 +126,7 @@ ppHyst <- function(x,n1,n2,feedingTime=720,tol=0){
     ## i.e., how much O2 was porduced under hysteresis
     ## compared to the total that would have been
     ## produced without feeding
-    pcdb <- sum(hyst) / sum(base) 
+    pcdb <- (sum(hyst) - sum(base)) / sum(base) 
     ## output
     out <- c(return.time=rr.t,prr=prr,pcdb=pcdb)
     return(out)

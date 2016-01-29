@@ -119,15 +119,17 @@ ppHyst <- function(x,n1,n2,feedingTime=720,tol=0){
     if (is.na(rr.t)){rr.t <- length(min.dhb)}
     ## change in dbase from start of feeding to dbase=0 
     ## or last time when feeding would occur
-    ## proportionate return rate = proportion of change 
+    ## absolute and proportionate return rate = change 
     ## from initial feeding point
+    arr <- (min.dhb[1] - min.dhb[rr.t]) / rr.t 
     prr <- (min.dhb[1] - min.dhb[rr.t]) / min.dhb[1] / rr.t 
     ## proportion cumulative O2 change from base
     ## i.e., how much O2 was porduced under hysteresis
     ## compared to the total that would have been
     ## produced without feeding
+    acdb <- sum(hyst) - sum(base)
     pcdb <- (sum(hyst) - sum(base)) / sum(base) 
     ## output
-    out <- c(return.time=rr.t,prr=prr,pcdb=pcdb)
+    out <- c(return.time=rr.t,arr=arr,acdb=acdb,prr=prr,pcdb=pcdb)
     return(out)
 }

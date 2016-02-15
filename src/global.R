@@ -133,3 +133,33 @@ ppHyst <- function(x,n1,n2,feedingTime=720,tol=0){
     out <- c(return.time=rr.t,arr=arr,acdb=acdb,prr=prr,pcdb=pcdb)
     return(out)
 }
+
+carpenterMod <- function(x0,tf=100,a=1,b=1,r=1,FUN,verbose=FALSE){
+    x <- x0
+    for (t in 2:tf){
+        if (verbose){print(t)}
+        x[t] <- x[t-1] + (a - b*x[t-1] + r*get(FUN)(x[t-1]))
+    }
+    return(x)
+}
+
+hill <- function(x,p=100,h=125){x^p / (x^p + h^p)}
+
+noiseSimulator <- function(x0,tf=100,a=1,b=1,r=1,eta=0,FUN,NOISE,verbose=FALSE){
+    x <- x0
+    for (t in 2:tf){
+        if (verbose){print(t)}
+        x[t] <- x[t-1] + (a - b*x[t-1] + r*get(FUN)(x[t-1])) + eta*get(NOISE)()
+    }
+    return(x)
+}
+
+normal.noise <- function(){rnorm(1,sd=3)}
+
+lagplot <- function(x,k,xlab,ylab,type='l'){
+    if (missing(xlab)){xlab <- 'x'}
+    if (missing(ylab)){ylab <- 'x'}
+    x1 <- x[1:(length(x) - k)]
+    x2 <- x[(k + 1):(length(x))]
+    plot(x1,x2,xlab=xlab,ylab=ylab,type=type)
+}

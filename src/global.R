@@ -15,7 +15,7 @@ photo <- function(days=3,Amax=1,Amin=0,Aqe=0.3,LCP=0,start=0,amp=50){
 }
 
 
-pitcherPlantSim <- function(days=3, foodWeight=c(0,1,0), beta=0.1, d=0,  k=1, Bscaler=1,m=0,aMax=10, aMin=0, s=10, feedingTime=720, c=100,x0=0,w0=0,bound.max=FALSE,verbose=FALSE){
+pitcherPlantSim <- function(days=3, foodWeight=c(0,1,0), beta=0.1, d=0,  k=1, Bscaler=1,m=0,aMax=10, aMin=0, s=10, feedingTime=720, c=100,x0=0,w0=0,p=1,bound.max=FALSE,verbose=FALSE){
     if (length(foodWeight) < days){
         foodWeight <- rep(foodWeight,days)[1:days]
     }
@@ -35,7 +35,7 @@ pitcherPlantSim <- function(days=3, foodWeight=c(0,1,0), beta=0.1, d=0,  k=1, Bs
                                         # initial augmentation value
     a <- (((aMax-aMin)/(1+exp(-(( s * n[length(minute)]) - d)))) + aMin)
                                         # initial biological o2 demand
-    B <- w[1]/(k+w[1])
+    B <- w[1]^p/(k^p+w[1]^p)
                                         # augmented photosynthesis initialization
     A <- a * P[1]
                                         #start day loop
@@ -58,7 +58,8 @@ pitcherPlantSim <- function(days=3, foodWeight=c(0,1,0), beta=0.1, d=0,  k=1, Bs
                                         # augmentation value
             a <- c(a,(((aMax - aMin)/(1 + exp((-(s * n[length(minute)]) - d)))) + aMin))
                                         # biological o2 demand
-            B <- c(B,a[length(minute)] * (w[length(minute)] / (k + w[length(minute)]) * Bscaler))
+            B <- c(B,a[length(minute)] * 
+                       (w[length(minute)]^p / (k^p + w[length(minute)]^p) * Bscaler))
                                         # augmented photosynthesis initialization
             A <- c(A,a[length(minute)] * P[length(minute)])
                                         # o2 at minute=0, P=0 b/c unable to index at minute=0
@@ -156,12 +157,20 @@ noiseSimulator <- function(x0,tf=100,a=1,b=1,r=1,eta=0,FUN,NOISE,verbose=FALSE){
 
 normal.noise <- function(){rnorm(1,sd=3)}
 
-lagplot <- function(x,k=1,xlab,ylab,type='l',std=FALSE){
+lagplot <- function(x,k=1,xlab,ylab,type='l',std=FALSE,add=FALSE,col='grey',pch=19,cex=1,lwd=1){
     if (missing(xlab)){xlab <- 'x'}
-    if (missing(ylab)){ylab <- 'x'}
+    if (missing(ylab)){ylab <- expression('x'[t+k])}
     if (std){x <- (x-mean(x))/sd(x)}
     x1 <- x[1:(length(x) - k)]
     x2 <- x[(k + 1):(length(x))]
-    plot(x1,x2,xlab=xlab,ylab=ylab,type=type)
+    if (add){
+        if (type == 'p'){
+            points(x1,x2,xlab=xlab,ylab=ylab,col=col,pch=pch,cex=cex)
+        }else{
+            lines(x1,x2,xlab=xlab,ylab=ylab,col=col,lwd=lwd)
+        }
+    }else{
+        plot(x1,x2,xlab=xlab,ylab=ylab,type=type,col=col,pch=pch,cex=cex,lwd=lwd)
+    }
 }
 

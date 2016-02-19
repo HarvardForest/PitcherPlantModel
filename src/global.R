@@ -33,22 +33,22 @@ pitcherPlantSim <- function(days=3, foodWeight=c(0,1,0), beta=0.1, d=0,  k=1, Bs
     ## Initialization ##
                                         # time keeper
     minute <- 1
-                                        # o2 at minute=0, P=0 b/c unable to index at minute=0
-    x <- x0
                                         # simulate photosynthesis as fixed values
-    P <- rescale(photo(days),c(0,1),c(aMin,aMax))
+    P <- photo(days)
                                         # food weight at time 1
     if (feedingTime == 1){
         w <- w0 + foodWeight[1]
     }else{w <- w0}
                                         # initial nutrient value
-    n <- w[1] * x[1] / c
+    n <- w[1] * x0 / c
                                         # initial augmentation value
     a <- (((aMax-aMin)/(1+exp(-(( s * n[length(minute)]) - d)))) + aMin)
                                         # initial biological o2 demand
     B <- w[1]/(k+w[1])
                                         # augmented photosynthesis initialization
     A <- rescale(a * P[1],c(aMax,aMin),c(aMax,aMin))
+                                        # o2 at minute=0, P=0 b/c unable to index at minute=0
+    x <- A[length(minute)] - (m + B[length(minute)])
                                         #start day loop
     for (z in 1:days){
                                         #star minute loop
@@ -72,7 +72,7 @@ pitcherPlantSim <- function(days=3, foodWeight=c(0,1,0), beta=0.1, d=0,  k=1, Bs
             B <- c(B,a[length(minute)] * 
                        (w[length(minute)] / (k + w[length(minute)]) * Bscaler))
                                         # augmented photosynthesis initialization
-            A <- c(A,rescale(a[length(minute)] * P[length(minute)]))
+            A <- c(A,rescale(a[length(minute)] * P[length(minute)],c(aMin,aMax),c(aMin,aMax)))
                                         # o2 at minute=0, P=0 b/c unable to index at minute=0
             x <- c(x, A[length(minute)] - (m + B[length(minute)]))
             if (is.na(x[length(x)])){x[length(x)] <- 0}

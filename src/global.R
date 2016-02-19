@@ -4,6 +4,12 @@
 ## 12:00 noon = 720
 ## 18:00 sunset = 1080
 
+rescale <- function(x,ro=c(0,100),rn=c(0,1)){
+    or <- max(ro) - min(ro)
+    nr <- max(rn) - min(rn)
+    (((x - min(ro)) * nr) / or) + min(rn)
+}
+
 PAR <- function(days=3,start=0,amp=100){
     amp * sin(2 * pi * rep((1:1440 + 1080 + start),days) * (1/1440))
 }
@@ -14,8 +20,13 @@ photo <- function(days=3,Amax=1,Amin=0,Aqe=0.3,LCP=0,start=0,amp=50){
     return(out)
 }
 
+decomp <- function(w,beta=0.075,w.w=75){
+    ### set to decompose a 75 um wasp
+    ### over the course of 2880 minutes
+    w * exp(-beta*w.w)
+}
 
-pitcherPlantSim <- function(days=3, foodWeight=c(0,1,0), beta=0.1, d=0,  k=1, Bscaler=1,m=0,aMax=10, aMin=0, s=10, feedingTime=720, c=100,x0=0,w0=0,p=1,bound.max=FALSE,verbose=FALSE){
+pitcherPlantSim <- function(days=3, foodWeight=c(0,1,0), beta=0.1, d=0,  k=1, Bscaler=1,m=0,aMax=10, aMin=2, s=10, feedingTime=720, c=100,x0=0,w0=0,w.w=75,bound.max=FALSE,verbose=FALSE){
     if (length(foodWeight) < days){
         foodWeight <- rep(foodWeight,days)[1:days]
     }
@@ -25,7 +36,7 @@ pitcherPlantSim <- function(days=3, foodWeight=c(0,1,0), beta=0.1, d=0,  k=1, Bs
                                         # o2 at minute=0, P=0 b/c unable to index at minute=0
     x <- x0
                                         # simulate photosynthesis as fixed values
-    P <- photo(days)
+    P <- rescale(photo(days),c(0,1),c(aMin,aMax))
                                         # food weight at time 1
     if (feedingTime == 1){
         w <- w0 + foodWeight[1]
@@ -35,9 +46,9 @@ pitcherPlantSim <- function(days=3, foodWeight=c(0,1,0), beta=0.1, d=0,  k=1, Bs
                                         # initial augmentation value
     a <- (((aMax-aMin)/(1+exp(-(( s * n[length(minute)]) - d)))) + aMin)
                                         # initial biological o2 demand
-    B <- w[1]^p/(k^p+w[1]^p)
+    B <- w[1]/(k+w[1])
                                         # augmented photosynthesis initialization
-    A <- a * P[1]
+    A <- rescale(a * P[1],c(aMax,aMin),c(aMax,aMin))
                                         #start day loop
     for (z in 1:days){
                                         #star minute loop
@@ -46,8 +57,8 @@ pitcherPlantSim <- function(days=3, foodWeight=c(0,1,0), beta=0.1, d=0,  k=1, Bs
                                         # update #
                                         # time keeper
             minute <- c(minute,minute[length(minute)] + 1)
-                                        # food weight at time 1
-            wt <- w[length(minute) - 1] * exp(w[length(minute) - 1] * -beta)
+                                        # food weight at t
+            wt <- w[length(minute) - 1] - decomp(w[length(minute) - 1],beta=beta,w.w=w.w)
             if (j == feedingTime){
                 w <- c(w,wt + foodWeight[z])
             }else{
@@ -59,9 +70,9 @@ pitcherPlantSim <- function(days=3, foodWeight=c(0,1,0), beta=0.1, d=0,  k=1, Bs
             a <- c(a,(((aMax - aMin)/(1 + exp((-(s * n[length(minute)]) - d)))) + aMin))
                                         # biological o2 demand
             B <- c(B,a[length(minute)] * 
-                       (w[length(minute)]^p / (k^p + w[length(minute)]^p) * Bscaler))
+                       (w[length(minute)] / (k + w[length(minute)]) * Bscaler))
                                         # augmented photosynthesis initialization
-            A <- c(A,a[length(minute)] * P[length(minute)])
+            A <- c(A,rescale(a[length(minute)] * P[length(minute)]))
                                         # o2 at minute=0, P=0 b/c unable to index at minute=0
             x <- c(x, A[length(minute)] - (m + B[length(minute)]))
             if (is.na(x[length(x)])){x[length(x)] <- 0}

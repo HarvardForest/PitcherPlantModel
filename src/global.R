@@ -26,7 +26,7 @@ decomp <- function(w,beta=0.075,w.w=75){
     w * exp(-beta*w.w)
 }
 
-pitcherPlantSim <- function(days=3, foodWeight=c(0,1,0), beta=0.1, d=0,  k=1, Bscaler=1,m=0,aMax=10, aMin=2, s=10, feedingTime=720, c=100,x0=0,w0=0,w.w=75,bound.max=FALSE,verbose=FALSE){
+pitcherPlantSim <- function(days=3, foodWeight=c(0,1,0), beta=0.1, d=0,  k=1, Bscaler=1,m=0,aMax=2, aMin=1, s=1, feedingTime=720, c=100,x0=0,w0=0,w.w=75,bound.max=FALSE,verbose=FALSE){
     if (length(foodWeight) < days){
         foodWeight <- rep(foodWeight,days)[1:days]
     }
@@ -42,7 +42,7 @@ pitcherPlantSim <- function(days=3, foodWeight=c(0,1,0), beta=0.1, d=0,  k=1, Bs
                                         # initial nutrient value
     n <- w[1] * x0 / c
                                         # initial augmentation value
-    a <- (((aMax-aMin)/(1+exp(-(( s * n[length(minute)]) - d)))) + aMin)
+    a <- ((aMax-aMin)/(1+exp(-s*(n[length(minute)]) - d)) + aMin
                                         # initial biological o2 demand
     B <- w[1]/(k+w[1])
                                         # augmented photosynthesis initialization
@@ -67,12 +67,14 @@ pitcherPlantSim <- function(days=3, foodWeight=c(0,1,0), beta=0.1, d=0,  k=1, Bs
                                         # nutrient value
             n <- c(n,w[length(minute)] * x[length(minute) - 1] / c)
                                         # augmentation value
+
+
             a <- c(a,(((aMax - aMin)/(1 + exp((-(s * n[length(minute)]) - d)))) + aMin))
                                         # biological o2 demand
             B <- c(B,a[length(minute)] * 
                        (w[length(minute)] / (k + w[length(minute)]) * Bscaler))
                                         # augmented photosynthesis initialization
-            A <- c(A,rescale(a[length(minute)] * P[length(minute)],c(aMin,aMax),c(aMin,aMax)))
+            A <- c(A,a[length(minute)] * P[length(minute)],c(aMin,aMax),c(aMin,aMax))
                                         # o2 at minute=0, P=0 b/c unable to index at minute=0
             x <- c(x, A[length(minute)] - (m + B[length(minute)]))
             if (is.na(x[length(x)])){x[length(x)] <- 0}

@@ -46,7 +46,7 @@ pitcherPlantSim <- function(days=3, foodWeight=c(0,1,0), beta=0.1, d=0,  k=1, Bs
                                         # initial biological o2 demand
     B <- w[1]/(k+w[1])
                                         # augmented photosynthesis initialization
-    A <- rescale(a * P[1],c(aMax,aMin),c(aMax,aMin))
+    A <- a * P[1]
                                         # o2 at minute=0, P=0 b/c unable to index at minute=0
     x <- A[length(minute)] - (m + B[length(minute)])
                                         #start day loop
@@ -67,14 +67,12 @@ pitcherPlantSim <- function(days=3, foodWeight=c(0,1,0), beta=0.1, d=0,  k=1, Bs
                                         # nutrient value
             n <- c(n,w[length(minute)] * x[length(minute) - 1] / c)
                                         # augmentation value
-
-
-            a <- c(a,(((aMax - aMin)/(1 + exp((-(s * n[length(minute)]) - d)))) + aMin))
+            a <- c(a,((aMax-aMin)/(1+exp(-s*(n[length(minute)]) - d)) + aMin)
                                         # biological o2 demand
             B <- c(B,a[length(minute)] * 
                        (w[length(minute)] / (k + w[length(minute)]) * Bscaler))
                                         # augmented photosynthesis initialization
-            A <- c(A,a[length(minute)] * P[length(minute)],c(aMin,aMax),c(aMin,aMax))
+            A <- c(A,a[length(minute)] * P[length(minute)])
                                         # o2 at minute=0, P=0 b/c unable to index at minute=0
             x <- c(x, A[length(minute)] - (m + B[length(minute)]))
             if (is.na(x[length(x)])){x[length(x)] <- 0}
@@ -97,7 +95,6 @@ pitcherPlantSim <- function(days=3, foodWeight=c(0,1,0), beta=0.1, d=0,  k=1, Bs
     colnames(data) <- c("Minute", "Oxygen", "PAR","Photosynthesis",
                         "Biological Oxygen Demand", "Food Amount", "Nutrients",
                         "Augmentation Value")
-
     return(data)
 }
 

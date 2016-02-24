@@ -4,6 +4,14 @@
 ## 12:00 noon = 720
 ## 18:00 sunset = 1080
 
+augmentation <- function(n=seq(0,10,by=0.01),s=1,d=5,aMin=0,aMax=2){
+    ((aMax-aMin)/(1+exp(-s*(n - d)))) + aMin
+}
+
+mineralization <- function(x,w,c=100){
+    (w * x)/c
+}
+
 rescale <- function(x,ro=c(0,100),rn=c(0,1)){
     or <- max(ro) - min(ro)
     nr <- max(rn) - min(rn)
@@ -20,13 +28,13 @@ photo <- function(days=3,Amax=1,Amin=0,Aqe=0.3,LCP=0,start=0,amp=50){
     return(out)
 }
 
-decomp <- function(w,beta=0.075,w.w=75){
+decomp <- function(w,beta=0.000075,w.w=75){
     ### set to decompose a 75 um wasp
     ### over the course of 2880 minutes
     w * exp(-beta*w.w)
 }
 
-pitcherPlantSim <- function(days=3, foodWeight=c(0,1,0), beta=0.1, d=0,  k=1, Bscaler=1,m=0,aMax=2, aMin=1, s=1, feedingTime=720, c=100,x0=0,w0=0,w.w=75,bound.max=FALSE,verbose=FALSE){
+pitcherPlantSim <- function(days=3, foodWeight=c(0,1,0), beta=0.000075, d=5,  k=1,Amin=0,Amax=1, m=0,aMax=2, aMin=1, s=1, feedingTime=720, c=1,x0=0,w0=0,w.w=75,bound.max=FALSE,verbose=FALSE){
     if (length(foodWeight) < days){
         foodWeight <- rep(foodWeight,days)[1:days]
     }
@@ -34,17 +42,17 @@ pitcherPlantSim <- function(days=3, foodWeight=c(0,1,0), beta=0.1, d=0,  k=1, Bs
                                         # time keeper
     minute <- 1
                                         # simulate photosynthesis as fixed values
-    P <- photo(days)
+    P <- photo(days,Amax,Amin)
                                         # food weight at time 1
     if (feedingTime == 1){
         w <- w0 + foodWeight[1]
     }else{w <- w0}
                                         # initial nutrient value
-    n <- w[1] * x0 / c
+    n <- mineralization(x0,w[1],c)
                                         # initial augmentation value
-    a <- ((aMax-aMin)/(1+exp(-s*(n[length(minute)]) - d)) + aMin
+    a <- augmentation(n[length(n)],s,d,aMin,aMax)
                                         # initial biological o2 demand
-    B <- w[1]/(k+w[1])
+    B <- a * (w[1]/(k+w[1]))
                                         # augmented photosynthesis initialization
     A <- a * P[1]
                                         # o2 at minute=0, P=0 b/c unable to index at minute=0
@@ -58,19 +66,19 @@ pitcherPlantSim <- function(days=3, foodWeight=c(0,1,0), beta=0.1, d=0,  k=1, Bs
                                         # time keeper
             minute <- c(minute,minute[length(minute)] + 1)
                                         # food weight at t
-            wt <- w[length(minute) - 1] - decomp(w[length(minute) - 1],beta=beta,w.w=w.w)
+            wt <- decomp(w[length(minute) - 1],beta=beta,w.w=w.w)
             if (j == feedingTime){
                 w <- c(w,wt + foodWeight[z])
             }else{
                 w <- c(w,wt)
             }
                                         # nutrient value
-            n <- c(n,w[length(minute)] * x[length(minute) - 1] / c)
+            n <- c(n,mineralization(x[length(minute) - 1],w[length(minute)], c))
                                         # augmentation value
-            a <- c(a,((aMax-aMin)/(1+exp(-s*(n[length(minute)]) - d)) + aMin)
+            a <- c(a,augmentation(n[length(n)],s,d,aMin,aMax))
                                         # biological o2 demand
             B <- c(B,a[length(minute)] * 
-                       (w[length(minute)] / (k + w[length(minute)]) * Bscaler))
+                       (w[length(minute)] / (k + w[length(minute)])))
                                         # augmented photosynthesis initialization
             A <- c(A,a[length(minute)] * P[length(minute)])
                                         # o2 at minute=0, P=0 b/c unable to index at minute=0

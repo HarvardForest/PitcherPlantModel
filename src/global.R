@@ -192,3 +192,16 @@ lagplot <- function(x,k=1,xlab,ylab,type='l',std=FALSE,add=FALSE,col='grey',pch=
     }
 }
 
+## ppReturn: return time for the pitcher plant o2
+
+ppReturn <- function(x,feed.time=720,thresh=0.00001,minutes=FALSE){
+    o2 <- x$Oxygen
+    days <- (length(o2)) / 1440
+    mids <- seq((feed.time + 1) , (feed.time + 1 + (1440 * (days-1))),by=1440)
+    o2.mids <- o2[mids]
+    feed.day <- head(((1:length(o2.mids))[o2.mids < o2.mids[1]]),1)
+    r.o2 <- o2[((feed.day * 1440 + feed.time):length(o2))]
+    r.time <- ((feed.day * 1440 + feed.time):length(o2))[abs(r.o2 - o2.mids[1]) <= thresh][1] - (feed.day * 1440 - feed.time)
+    if (minutes){}else{r.time <- r.time / 1440}
+    return(r.time)
+}

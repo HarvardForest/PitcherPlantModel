@@ -175,6 +175,16 @@ noiseSimulator <- function(x0,tf=100,a=1,b=1,r=1,eta=0,FUN,NOISE,verbose=FALSE){
 
 normal.noise <- function(){rnorm(1,sd=3)}
 
+lagit <- function(x,k=1,xlab,ylab,type='l',std=FALSE,add=FALSE,col='grey',pch=19,cex=1,lwd=1){
+    if (missing(xlab)){xlab <- 'x'}
+    if (missing(ylab)){ylab <- expression('x'[t+k])}
+    if (std){x <- (x-mean(x))/sd(x)}
+    x1 <- x[1:(length(x) - k)]
+    x2 <- x[(k + 1):(length(x))]
+    return(data.frame(x=x1,y=x2))
+}
+
+
 lagplot <- function(x,k=1,xlab,ylab,type='l',std=FALSE,add=FALSE,col='grey',pch=19,cex=1,lwd=1){
     if (missing(xlab)){xlab <- 'x'}
     if (missing(ylab)){ylab <- expression('x'[t+k])}
@@ -191,6 +201,7 @@ lagplot <- function(x,k=1,xlab,ylab,type='l',std=FALSE,add=FALSE,col='grey',pch=
         plot(x1,x2,xlab=xlab,ylab=ylab,type=type,col=col,pch=pch,cex=cex,lwd=lwd)
     }
 }
+
 
 ## ppReturn: return time for the pitcher plant o2
 

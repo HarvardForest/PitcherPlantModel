@@ -120,38 +120,6 @@ minify <- function(x,p=1440){
     return(unlist(out))
 }
 
-### hysteresis statistics
-
-ppHyst <- function(x,n1,n2,feedingTime=720,tol=0){
-    if (class(x) != 'numeric' & 
-        (class(x) == 'data.frame' | class(x) == 'matrix')){
-        x <- x$Oxygen
-    }
-    hyst.start <- (((n1+n2)*1440) + 1) - feedingTime
-    hyst <- x[hyst.start:length(x)]
-    if (n1 != 1 & any(x[1:1440] != x[1441:2880])){warning('n1! Check base values.')}
-    base <- rep(x[1:1440],ceiling(I(length(hyst)/1440)))[-1:-feedingTime]
-    dhb <- hyst - base
-    min.dhb <- minify(dhb)
-    ## return rate = time from last feeding to return to base
-    rr.t <- (1:length(min.dhb))[abs(min.dhb) <= tol][1]
-    if (is.na(rr.t)){rr.t <- length(min.dhb)}
-    ## change in dbase from start of feeding to dbase=0 
-    ## or last time when feeding would occur
-    ## absolute and proportionate return rate = change 
-    ## from initial feeding point
-    arr <- (min.dhb[1] - min.dhb[rr.t]) / rr.t 
-    prr <- (min.dhb[1] - min.dhb[rr.t]) / min.dhb[1] / rr.t 
-    ## proportion cumulative O2 change from base
-    ## i.e., how much O2 was porduced under hysteresis
-    ## compared to the total that would have been
-    ## produced without feeding
-    acdb <- sum(hyst) - sum(base)
-    pcdb <- (sum(hyst) - sum(base)) / sum(base) 
-    ## output
-    out <- c(return.time=rr.t,arr=arr,acdb=acdb,prr=prr,pcdb=pcdb)
-    return(out)
-}
 
 carpenterMod <- function(x0,tf=100,a=1,b=1,r=1,FUN,verbose=FALSE){
     x <- x0
@@ -203,12 +171,57 @@ lagplot <- function(x,k=1,xlab,ylab,type='l',std=FALSE,add=FALSE,col='grey',pch=
 }
 
 
+### hysteresis statistics
+ppHyst <- function(x,n1,n2,feedingTime=720,tol=0){
+    if (class(x) != 'numeric' & 
+        (class(x) == 'data.frame' | class(x) == 'matrix')){
+        x <- x$Oxygen
+    }
+    hyst.start <- (((n1+n2)*1440) + 1) - feedingTime
+    hyst <- x[hyst.start:length(x)]
+    if (n1 != 1 & any(x[1:1440] != x[1441:2880])){warning('n1! Check base values.')}
+    base <- rep(x[1:1440],ceiling(I(length(hyst)/1440)))[-1:-feedingTime]
+    dhb <- hyst - base
+    min.dhb <- minify(dhb)
+    ## return rate = time from last feeding to return to base
+    rr.t <- (1:length(min.dhb))[abs(min.dhb) <= tol][1]
+    if (is.na(rr.t)){rr.t <- length(min.dhb)}
+    ## change in dbase from start of feeding to dbase=0 
+    ## or last time when feeding would occur
+    ## absolute and proportionate return rate = change 
+    ## from initial feeding point
+    arr <- (min.dhb[1] - min.dhb[rr.t]) / rr.t 
+    prr <- (min.dhb[1] - min.dhb[rr.t]) / min.dhb[1] / rr.t 
+    ## proportion cumulative O2 change from base
+    ## i.e., how much O2 was porduced under hysteresis
+    ## compared to the total that would have been
+    ## produced without feeding
+    acdb <- sum(hyst) - sum(base)
+    pcdb <- (sum(hyst) - sum(base)) / sum(base) 
+    ## output
+    out <- c(return.time=rr.t,arr=arr,acdb=acdb,prr=prr,pcdb=pcdb)
+    return(out)
+}
+
+
+### ppAnoxia: identify the amount of time that
+### the model spends in the anoxic zone
+
+ppAnoxia <- function(x,thresh=0.05,relative=TRUE){
+    o2 <- x$Oxygen
+    if (relative){out <- length(o2[o2 <= thresh]) / length(o2)}else{
+        out <- length(o2[o2 <= thresh])
+    }
+    return(out)
+}
+
 ## ppReturn: return time for the pitcher plant o2
 
 ppReturn <- function(x,feed.time=720,thresh=0.00001,minutes=FALSE){
     o2 <- x$Oxygen
     days <- (length(o2)) / 1440
-    mids <- seq((feed.time + 1) , (feed.time + 1 + (1440 * (days-1))),by=1440)
+    mids <- seq((feed.time + 1) , (feed.time + 1 + (1440 *
+                                                        (days-1))),by=1440)
     o2.mids <- o2[mids]
     feed.day <- head(((1:length(o2.mids))[o2.mids < o2.mids[1]]),1)
     o2.delta <- sum(o2.mids[c(feed.day,length(o2.mids))] * c(-1,1))

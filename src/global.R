@@ -34,7 +34,9 @@ decomp <- function(w,beta=4.5e-05,w.w=75){
     w * exp(-beta*w.w)
 }
 
-pitcherPlantSim <- function(days=3, foodWeight=c(0,1,0), beta=4.5e-05, d=5,  k=1,Amin=0,Amax=1, m=0,aMax=2, aMin=1, s=1, feedingTime=720, c=1,x0=0,w0=0,w.w=75,bound.max=FALSE,verbose=FALSE){
+pitcherPlantSim <- function(days=3, foodWeight=c(0,1,0), beta=4.5e-05,
+                            d=5, k=1,Amin=0,Amax=1, m=0,aMax=2, aMin=1, s=1, feedingTime=720,
+                            c=1,x0=0,w0=0,w.w=75,bound.max=FALSE,verbose=FALSE){
     if (length(foodWeight) < days){
         foodWeight <- rep(foodWeight,days)[1:days]
     }

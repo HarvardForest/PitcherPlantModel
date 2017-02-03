@@ -36,7 +36,8 @@ decomp <- function(w,beta=4.5e-05,w.w=75){
 
 pitcherPlantSim <- function(days=3, foodWeight=c(0,1,0), beta=4.5e-05,
                             d=5, k=1,Amin=0,Amax=1, m=0,aMax=2, aMin=1, s=1, feedingTime=720,
-                            c=1,x0=0,w0=0,w.w=75,bound.max=FALSE,verbose=FALSE){
+                            c=1,x0=0,w0=0,w.w=75,bound.max=FALSE,verbose=FALSE,
+                            photo.constant = TRUE, photo.val = 1){
     if (length(foodWeight) < days){
         foodWeight <- rep(foodWeight,days)[1:days]
     }
@@ -45,6 +46,7 @@ pitcherPlantSim <- function(days=3, foodWeight=c(0,1,0), beta=4.5e-05,
     minute <- 1
                                         # simulate photosynthesis as fixed values
     P <- photo(days,Amax,Amin)
+    if (photo.constant){P <- P * 0 + photo.val}
                                         # food weight at time 1
     if (feedingTime == 1){
         w <- w0 + foodWeight[1]
@@ -90,7 +92,6 @@ pitcherPlantSim <- function(days=3, foodWeight=c(0,1,0), beta=4.5e-05,
             if (bound.max & x[length(x)] > aMax){x[length(x)] <- aMax}
         } # end minute loop
     } # end day loop
-
                                         # trim objects to appropriate time
                                         # omitted values aren't relevant
     minute <- minute[1:length(P)]
@@ -232,3 +233,17 @@ ppReturn <- function(x,feed.time=720,thresh=0.00001,minutes=FALSE){
     rr <- o2.delta / time.delta
     return(rr)
 }
+
+#' Function for pitcher plant prey addition
+#' MKLau 02February2017
+#' @examples
+#' sim <- pitcherPlantSim(days, (fw + fw.perturb) , beta = 4e-06, verbose = TRUE)
+
+ppSimPrey <- function(days = 30, prey.mass = 10,prey.rate = 3,perturb.mass = 10, perturb.rate = 3){
+
+    fw <- rep(c(rep(0,prey.rate - 1),prey.mass),ceiling(days / prey.rate))[1:days]
+    fw.perturb <- rep(c(rep(0,perturb.rate - 1),perturb.mass),ceiling(days / perturb.rate))[1:days]
+    fw + fw.perturb
+
+}
+

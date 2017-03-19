@@ -1,7 +1,6 @@
 ### Fitting the pitcherplantmodel output to
 ### data from the Sirota 2014 pitcherplant model
 
-library(magrittr)
 library(txtplot)
 
 ### Import from the Harvard Forest Archive

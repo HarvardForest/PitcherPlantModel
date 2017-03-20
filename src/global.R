@@ -28,7 +28,7 @@ photo <- function(days=3,Amax=1,Amin=0,Aqe=0.3,LCP=0,start=0,amp=50){
     return(out)
 }
 
-decomp <- function(w,beta=4.5e-05,w.w=75){
+decomp <- function(w,beta=4.5e-05,w.w=0.075){
     ### set to decompose a 75 um wasp
     ### over the course of 2880 minutes
     w * exp(-beta*w.w)
@@ -37,7 +37,7 @@ decomp <- function(w,beta=4.5e-05,w.w=75){
 pitcherPlantSim <- function(days=3, foodWeight=c(0,1,0), beta=4.5e-05,
                             d=5, k=1,Amin=0,Amax=1, m=0,aMax=2, aMin=1, s=1, feedingTime=720,
                             c=1,x0=0,w0=0,w.w=75,bound.max=FALSE,verbose=FALSE,
-                            photo.constant = TRUE, photo.val = 1){
+                            photo.constant = FALSE, photo.val = 1){
     if (length(foodWeight) < days){
         foodWeight <- rep(foodWeight,days)[1:days]
     }

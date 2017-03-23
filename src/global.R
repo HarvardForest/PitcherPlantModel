@@ -4,6 +4,7 @@
 ## 12:00 noon = 720
 ## 18:00 sunset = 1080
 
+
 augmentation <- function(n=seq(0,10,by=0.01),s=1,d=5,aMin=1,aMax=2){
     ((aMax-aMin)/(1+exp(-s*(n - d)))) + aMin
 }
@@ -247,3 +248,8 @@ ppSimPrey <- function(days = 30, prey.mass = 10,prey.rate = 3,perturb.mass = 10,
 
 }
 
+min.rss <- function(data,par,days = 3){
+   with(data, sum((Oxygen - pitcherPlantSim(days=3, 
+                         beta = par[1], 
+                         k = par[2])$Oxygen)^2))
+}

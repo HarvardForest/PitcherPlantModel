@@ -248,8 +248,19 @@ ppSimPrey <- function(days = 30, prey.mass = 10,prey.rate = 3,perturb.mass = 10,
 
 }
 
-min.rss <- function(data,par,days = 3){
-   with(data, sum((Oxygen - pitcherPlantSim(days=3, 
-                         beta = par[1], 
-                         k = par[2])$Oxygen)^2))
+ddoSim <- function(days,fW,beta,k){
+    pitcherPlantSim(days=days, 
+                    beta = beta, 
+                    k = k,
+                    foodWeight = fW,
+                    )$Oxygen - 
+        pitcherPlantSim(days=days, 
+                        beta = beta, 
+                        k = k,
+                        foodWeight = fW*0,
+                        )$Oxygen
+}
+
+min.rss <- function(data,par){
+        with(data, sum((ddso -  ddoSim(days,fW,beta=par[1],k=par[2])[1:length(ddso)])^2))
 }

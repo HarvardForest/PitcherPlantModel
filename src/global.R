@@ -35,7 +35,7 @@ decomp <- function(w,beta=4.5e-05,w.w=0.075){
     w * exp(-beta*w.w)
 }
 
-pitcherPlantSim <- function(days=3, foodWeight=c(0,1,0), beta=4.5e-05,
+ppSim <- function(days=3, foodWeight=c(0,1,0), beta=4.5e-05,
                             d=5, k=1,Amin=0,Amax=1, m=0,aMax=2, aMin=1, s=1, feedingTime=720,
                             c=1,x0=0,w0=0,w.w=75,bound.max=FALSE,verbose=FALSE,
                             photo.constant = FALSE, photo.val = 1){
@@ -238,7 +238,7 @@ ppReturn <- function(x,feed.time=720,thresh=0.00001,minutes=FALSE){
 #' Function for pitcher plant prey addition
 #' MKLau 02February2017
 #' @examples
-#' sim <- pitcherPlantSim(days, (fw + fw.perturb) , beta = 4e-06, verbose = TRUE)
+#' sim <- ppSim(days, (fw + fw.perturb) , beta = 4e-06, verbose = TRUE)
 
 ppSimPrey <- function(days = 30, prey.mass = 10,prey.rate = 3,perturb.mass = 10, perturb.rate = 3){
 
@@ -249,12 +249,12 @@ ppSimPrey <- function(days = 30, prey.mass = 10,prey.rate = 3,perturb.mass = 10,
 }
 
 ddoSim <- function(days,fW,beta,k){
-    pitcherPlantSim(days=days, 
+    ppSim(days=days, 
                     beta = beta, 
                     k = k,
                     foodWeight = fW,
                     )$Oxygen - 
-        pitcherPlantSim(days=days, 
+        ppSim(days=days, 
                         beta = beta, 
                         k = k,
                         foodWeight = fW*0,

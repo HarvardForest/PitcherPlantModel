@@ -35,11 +35,12 @@ decomp <- function(w,beta=4.5e-05,w.w=0.075){
     w * exp(-beta*w.w)
 }
 
-ppSim <- function(days=3, foodWeight=c(0,1,0), beta=4.5e-05,
-                  d=5, k=1,Amin=0,Amax=1, m=0,aMax=2, aMin=1, s=1, 
-                  feedingTime=720,
-                  c=1,x0=0,w0=0,w.w=75,bound.max=FALSE,verbose=FALSE,
-                  photo.constant = FALSE, photo.val = 1){
+ppSim <- function(days=5,foodWeight=1,beta=4.5e-06,d=5,
+                  k=2,Amax=20,Amin=Amax/1.5,m=0,aMax=2 ,aMin=1,
+                  s=1 ,feedingTime=720,c=1,x0=0,w0=0,w.w=75,
+                  photo.val = 1,Ascalar = 0.75,Bscalar = 1,
+                  bound.max=FALSE,verbose=FALSE ,photo.constant = FALSE 
+                  ){
     if (length(foodWeight) < days){
         foodWeight <- rep(foodWeight,days)[1:days]
     }
@@ -47,7 +48,7 @@ ppSim <- function(days=3, foodWeight=c(0,1,0), beta=4.5e-05,
                                         # time keeper
     minute <- 1
                                         # simulate photosynthesis as fixed values
-    P <- photo(days,Amax,Amin)
+    P <- photo(days,(Amax/Amax),(Amax/Amin - 1))
     if (photo.constant){P <- P * 0 + photo.val}
                                         # food weight at time 1
     if (feedingTime == 1){
@@ -58,9 +59,9 @@ ppSim <- function(days=3, foodWeight=c(0,1,0), beta=4.5e-05,
                                         # initial augmentation value
     a <- augmentation(n[length(n)],s,d,aMin,aMax)
                                         # initial biological o2 demand
-    B <- a * (w[1]/(k+w[1]))
+    B <- Amax * ((a * Bscalar) * (w[1]/(k+w[1]))) 
                                         # augmented photosynthesis initialization
-    A <- a * P[1]
+    A <- Amax * ((a * Ascalar) * P[1])
                                         # o2 at minute=0, P=0 b/c unable to index at minute=0
     x <- A[length(minute)] - (m + B[length(minute)])
                                         #start day loop
@@ -83,10 +84,12 @@ ppSim <- function(days=3, foodWeight=c(0,1,0), beta=4.5e-05,
                                         # augmentation value
             a <- c(a,augmentation(n[length(n)],s,d,aMin,aMax))
                                         # biological o2 demand
-            B <- c(B,a[length(minute)] * 
-                       (w[length(minute)] / (k + w[length(minute)])))
+            B <- c(B,
+                   (Amax * 
+                        ((a[length(minute)] * Bscalar) * 
+                             (w[length(minute)] / (k + w[length(minute)])))))
                                         # augmented photosynthesis initialization
-            A <- c(A,a[length(minute)] * P[length(minute)])
+            A <- c(A,(Amax * (a[length(minute)] * Ascalar) * P[length(minute)]))
                                         # o2 at minute=0, P=0 b/c unable to index at minute=0
             x <- c(x, A[length(minute)] - (m + B[length(minute)]))
             if (is.na(x[length(x)])){x[length(x)] <- 0}
@@ -106,8 +109,8 @@ ppSim <- function(days=3, foodWeight=c(0,1,0), beta=4.5e-05,
                                         # prep for export
     data <- data.frame(minute, x, P, A, B, w, n, a)
     colnames(data) <- c("Minute", "Oxygen", "PAR","Photosynthesis",
-                        "Biological Oxygen Demand", "Food Amount", "Nutrients",
-                        "Augmentation Value")
+                        "Biological Oxygen Demand", "Food Amount", 
+                        "Nutrients","Augmentation Value")
     return(data)
 }
 
@@ -264,5 +267,9 @@ ddsoSim <- function(days,fW,beta,k){
 }
 
 min.rss <- function(data,par){
-        with(data, sum((ddso -  ddoSim(days,fW,beta=par[1],k=par[2])[1:length(ddso)])^2))
+    with(data, sum((ddso -  
+                        ddoSim(days,
+                               fW,
+                               beta = par[1],
+                               k = par[2])[1:length(ddso)])^2))
 }

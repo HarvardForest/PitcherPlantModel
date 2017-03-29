@@ -11,7 +11,7 @@ Amin <- min(mu.control[((1440*3):length(mu.control))])
 
 Amax / Amin
 
-test <- ppSim(5,10,Amin = Amin,Amax = Amax,beta = 4.5e-4,k=2)
+test <- ppSim(5,0,Amin = Amin,Amax = Amax,beta = 4.5e-4,k=2)
 
 plot(mu.control,ylim = c(0,35),type = 'l')
 lines(mu.control + sd.control,col = 'grey')
@@ -28,5 +28,7 @@ dsim <- (test$Oxygen - mean(test$Oxygen))/sd(test$Oxygen)
 plot((drc-mean(drc))/sd(drc))
 lines(dsim[-1:-720])
 
-mudd[[1]]
+res <- (drc-mean(drc))/sd(drc) - dsim[-1:-720][1:length((drc-mean(drc))/sd(drc))]
+plot(res)
+
 

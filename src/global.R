@@ -242,9 +242,13 @@ ppReturn <- function(x,feed.time=720,thresh=0.00001,minutes=FALSE){
 #' Function for pitcher plant prey addition
 #' MKLau 02February2017
 #' @examples
-#' sim <- ppSim(days, (fw + fw.perturb) , beta = 4e-06, verbose = TRUE)
+#' days <- 30
+#' prey.rate <- 3
+#' dist.return <- floor(days/2)
+#' prey <- simPrey(days,0.1,prey.rate,10,dist.return)
+#' ppSim(days,prey,beta=4.5e-6)
 
-ppSimPrey <- function(days = 30, prey.mass = 10,prey.rate = 3,perturb.mass = 10, perturb.rate = 3){
+simPrey <- function(days = 30, prey.mass = 10,prey.rate = 3,perturb.mass = 10, perturb.rate = 3){
 
     fw <- rep(c(rep(0,prey.rate - 1),prey.mass),ceiling(days / prey.rate))[1:days]
     fw.perturb <- rep(c(rep(0,perturb.rate - 1),perturb.mass),ceiling(days / perturb.rate))[1:days]

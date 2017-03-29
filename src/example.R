@@ -28,7 +28,7 @@ plot(a)
 plot(a~n)
 
 ## augmentation and oxygen
-sim <- pitcherPlantSim(5,foodWeight=c(0,75,75,75,0),c=5)
+sim <- ppSim(5,foodWeight=c(0,1,1,1,0))
 
 plot(sim$Oxygen~sim$'Augmentation Value',col=rainbow(nrow(sim)),pch=19,cex=0.5)
 abline(h=0,col='darkgrey',lty=2)

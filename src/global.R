@@ -39,7 +39,7 @@ ppSim <- function(days=5,foodWeight=1,beta=4.5e-06,d=5,
                   k=2,Amax=20,Amin=Amax/1.5,m=0,aMax=2 ,aMin=1,
                   s=1 ,feedingTime=720,c=1,x0=0,w0=0,w.w=75,
                   photo.val = 1,Ascalar = 0.75,Bscalar = 1,
-                  bound.max=FALSE,verbose=FALSE ,photo.constant = FALSE 
+                  bound.max=FALSE,verbose=FALSE ,decycle = FALSE
                   ){
     if (length(foodWeight) < days){
         foodWeight <- rep(foodWeight,days)[1:days]
@@ -49,7 +49,7 @@ ppSim <- function(days=5,foodWeight=1,beta=4.5e-06,d=5,
     minute <- 1
                                         # simulate photosynthesis as fixed values
     P <- photo(days,(Amax/Amax),(Amax/Amin - 1))
-    if (photo.constant){P <- P * 0 + photo.val}
+    if (decycle){cyc <- P}
                                         # food weight at time 1
     if (feedingTime == 1){
         w <- w0 + foodWeight[1]
@@ -100,15 +100,16 @@ ppSim <- function(days=5,foodWeight=1,beta=4.5e-06,d=5,
                                         # trim objects to appropriate time
                                         # omitted values aren't relevant
     minute <- minute[1:length(P)]
+    Control <- (P * Amax * (augmentation(0,s,d,aMin,aMax) * Ascalar))
     A <- A[1:length(P)]
     B <- B[1:length(P)]
     n <- n[1:length(P)]
     a <- a[1:length(P)]
-    x <- x[1:length(P)]
+    if (decycle){x <- x[1:length(P)] - Control}else{x <- x[1:length(P)]}
     w <- w[1:length(P)]
                                         # prep for export
-    data <- data.frame(minute, x, P, A, B, w, n, a)
-    colnames(data) <- c("Minute", "Oxygen", "PAR","Photosynthesis",
+    data <- data.frame(minute, x, Control, A, B, w, n, a)
+    colnames(data) <- c("Minute", "Oxygen", "Control","Photosynthesis",
                         "Biological Oxygen Demand", "Food Amount", 
                         "Nutrients","Augmentation Value")
     return(data)
@@ -260,14 +261,8 @@ ddsoSim <- function(days,fW,beta,k){
     x <- ppSim(days=days, 
                     beta = beta, 
                     k = k,
-                    foodWeight = fW,
-                    )$Oxygen - 
-        ppSim(days=days, 
-                        beta = beta, 
-                        k = k,
-                        foodWeight = fW*0,
-                        )$Oxygen
-    (x - mean(x))/sd(x)
+                    foodWeight = fW
+                    )
 }
 
 min.rss <- function(data,par){
